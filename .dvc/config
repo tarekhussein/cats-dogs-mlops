@@ -1,0 +1,4 @@
+[core]
+    remote = localstorage
+['remote "localstorage"']
+    url = /Users/husseita/dvc-storage/cats-dogs-mlops
