@@ -1,4 +1,7 @@
+import json
+import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from io import BytesIO
 from pathlib import Path
@@ -9,12 +12,15 @@ from PIL import Image, UnidentifiedImageError
 from torchvision import transforms
 
 from src.model import create_model
-
+from app.monitoring import record_prediction, get_metrics
 
 MODEL_PATH = Path(
     os.environ.get("MODEL_PATH", "models/best_model.pth")
 )
 DEVICE = torch.device("cpu")
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("cats_dogs_api")
 
 model = None
 class_names = []
@@ -109,19 +115,50 @@ async def predict(file: UploadFile = File(...)):
 
     tensor = preprocess(image).unsqueeze(0).to(DEVICE)
 
+
+    start_time = time.perf_counter()
+
     with torch.inference_mode():
         logits = model(tensor)
         probabilities = torch.softmax(logits, dim=1)[0]
 
+    inference_time_ms = round(
+        (time.perf_counter() - start_time) * 1000, 2
+    )
+
+
     predicted_idx = int(torch.argmax(probabilities).item())
 
+
+
+    prediction = class_names[predicted_idx]
+    confidence = round(
+        float(probabilities[predicted_idx].item()), 4
+    )
+    record_prediction(prediction=prediction,inference_time_ms=inference_time_ms,)
+
+    logger.info(
+        "prediction_event %s",
+        json.dumps({
+            "prediction": prediction,
+            "confidence": confidence,
+            "inference_time_ms": inference_time_ms,
+            "model_version": app.version,
+        }),
+    )
+
+
     return {
-        "prediction": class_names[predicted_idx],
-        "confidence": round(
-            float(probabilities[predicted_idx].item()), 4
-        ),
+        "prediction": prediction,
+        "confidence": confidence,
         "probabilities": {
             name: round(float(probabilities[idx].item()), 4)
             for idx, name in enumerate(class_names)
         },
+        "inference_time_ms": inference_time_ms,
     }
+
+
+@app.get("/metrics")
+def metrics():
+    return get_metrics()

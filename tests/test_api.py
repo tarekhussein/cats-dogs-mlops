@@ -96,3 +96,39 @@ def test_reject_oversized_image():
 
     assert response.status_code == 413
     assert response.json()["detail"] == "Image exceeds 10 MB limit"
+
+
+def test_metrics_track_predictions(test_image):
+    with TestClient(app) as client:
+        before = client.get("/metrics")
+        assert before.status_code == 200
+        initial = before.json()
+
+        response = client.post(
+            "/predict",
+            files={
+                "file": ("test.jpg", test_image, "image/jpeg")
+            },
+        )
+
+        assert response.status_code == 200
+        prediction = response.json()
+
+        assert isinstance(prediction["inference_time_ms"], (int, float))
+        assert prediction["inference_time_ms"] >= 0
+
+        after = client.get("/metrics")
+        assert after.status_code == 200
+        metrics = after.json()
+
+        assert (
+            metrics["total_predictions"]
+            == initial["total_predictions"] + 1
+        )
+
+        assert (
+            metrics["cat_predictions"] + metrics["dog_predictions"]
+            == metrics["total_predictions"]
+        )
+
+        assert metrics["average_inference_time_ms"] >= 0
