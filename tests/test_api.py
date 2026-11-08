@@ -19,17 +19,19 @@ def test_health():
     assert data["device"] == "cpu"
 
 
-def test_predict_cat():
-    image_path = next(
-        Path("data/processed/test/Cat").glob("*.jpg")
-    )
 
+def test_predict_cat(test_image):
     with TestClient(app) as client:
-        with image_path.open("rb") as image:
-            response = client.post(
-                "/predict",
-                files={"file": ("cat.jpg", image, "image/jpeg")},
-            )
+        response = client.post(
+            "/predict",
+            files={
+                "file": (
+                    "cat.jpg",
+                    test_image,
+                    "image/jpeg",
+                )
+            },
+        )
 
     assert response.status_code == 200
 
@@ -43,7 +45,6 @@ def test_predict_cat():
     assert abs(
         sum(data["probabilities"].values()) - 1.0
     ) < 0.001
-
 
 def test_reject_invalid_file_type():
     with TestClient(app) as client:

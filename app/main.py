@@ -1,4 +1,4 @@
-
+import os
 from contextlib import asynccontextmanager
 from io import BytesIO
 from pathlib import Path
@@ -11,7 +11,9 @@ from torchvision import transforms
 from src.model import create_model
 
 
-MODEL_PATH = Path("models/best_model.pth")
+MODEL_PATH = Path(
+    os.environ.get("MODEL_PATH", "models/best_model.pth")
+)
 DEVICE = torch.device("cpu")
 
 model = None
