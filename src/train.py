@@ -16,7 +16,7 @@ from model import create_model
 SEED = 42
 EPOCHS = 5
 LEARNING_RATE = 0.001
-MODEL_PATH = Path("models/best_model.pth")
+MODEL_PATH = Path("models/candidate_model.pth")
 
 TRACKING_URI = "http://127.0.0.1:5000"
 EXPERIMENT_NAME = "cats-dogs-classification"
