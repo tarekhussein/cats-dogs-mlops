@@ -1,0 +1,56 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Conda local environments
+.conda/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# macOS
+.DS_Store
+
+# VS Code local settings
+.vscode/
+
+# Datasets
+/data/raw/
+/data/processed/
+
+# Trained models and checkpoints
+/models/
+*.pt
+*.pth
+*.ckpt
+
+# MLflow local artifacts
+/mlruns/
+/mlartifacts/
+/mlflow.db
+
+# DVC local cache and configuration
+/.dvc/cache/
+/.dvc/tmp/
+/.dvc/config.local
+
+# Logs
+/logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
