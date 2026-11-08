@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
         weights_only=True,
     )
 
-    model = create_model()
+    model = create_model(pretrained=False)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(DEVICE)
     model.eval()

@@ -8,9 +8,11 @@ from torchvision.models import (
 )
 
 
-def create_model(num_classes=2):
-    # Load pretrained ImageNet weights
-    weights = MobileNet_V2_Weights.DEFAULT
+
+def create_model(num_classes=2, pretrained=True):
+    # Download ImageNet weights only when requested
+    weights = MobileNet_V2_Weights.DEFAULT if pretrained else None
+
     model = mobilenet_v2(weights=weights)
 
     # Freeze the feature extractor

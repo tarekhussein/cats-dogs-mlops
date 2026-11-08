@@ -31,7 +31,7 @@ def evaluate_model():
         weights_only=True,
     )
 
-    model = create_model(num_classes=2).to(device)
+    model = create_model(num_classes=2, pretrained=False).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 

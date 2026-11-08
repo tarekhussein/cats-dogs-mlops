@@ -1,0 +1,6 @@
+torch==2.5.1
+torchvision==0.20.1
+fastapi
+uvicorn
+python-multipart
+pillow
