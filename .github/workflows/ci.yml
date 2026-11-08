@@ -31,3 +31,42 @@ jobs:
       - name: Run API tests
         run: |
           python -m pytest -v tests/
+
+  docker:
+    name: Docker Build and Health Check
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build CI Docker image
+        run: |
+          docker build \
+            -f Dockerfile.ci \
+            -t cats-dogs-api:ci .
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name cats-dogs-ci-test \
+            -p 8002:8000 \
+            cats-dogs-api:ci
+
+      - name: Verify API health
+        run: |
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8002/health \
+              | python -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='healthy' and d['model_loaded'] is True"; then
+              echo "Docker API health check passed"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs cats-dogs-ci-test
+          exit 1
+
+      - name: Show container logs
+        if: always()
+        run: docker logs cats-dogs-ci-test || true
