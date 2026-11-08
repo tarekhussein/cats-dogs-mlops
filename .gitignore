@@ -38,10 +38,12 @@ env/
 *.pth
 *.ckpt
 
-# MLflow local artifacts
-/mlruns/
-/mlartifacts/
-/mlflow.db
+# MLflow local database and artifacts
+mlflow.db
+mlflow.db-shm
+mlflow.db-wal
+mlruns/
+mlartifacts/
 
 # DVC local cache and configuration
 /.dvc/cache/
