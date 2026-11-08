@@ -26,9 +26,11 @@ env/
 # VS Code local settings
 .vscode/
 
-# Datasets
+# Original dataset stays outside Git
 /data/raw/
-/data/processed/
+
+# Processed dataset contents are managed by DVC
+# DVC will generate data/.gitignore
 
 # Trained models and checkpoints
 /models/
@@ -54,3 +56,4 @@ env/
 dist/
 build/
 *.egg-info/
+
