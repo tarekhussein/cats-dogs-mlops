@@ -5,7 +5,7 @@ import time
 from contextlib import asynccontextmanager
 from io import BytesIO
 from pathlib import Path
-
+import hashlib
 import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image, UnidentifiedImageError
@@ -24,6 +24,7 @@ logger = logging.getLogger("cats_dogs_api")
 
 model = None
 class_names = []
+model_version = None
 
 preprocess = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -37,7 +38,19 @@ preprocess = transforms.Compose([
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model, class_names
+    global model, class_names, model_version
+
+
+    sha256 = hashlib.sha256()
+
+    with MODEL_PATH.open("rb") as checkpoint_file:
+        for chunk in iter(
+            lambda: checkpoint_file.read(1024 * 1024),
+            b"",
+        ):
+            sha256.update(chunk)
+
+    model_version = sha256.hexdigest()
 
     checkpoint = torch.load(
         MODEL_PATH,
@@ -79,6 +92,7 @@ def health():
         "status": "healthy",
         "model_loaded": model is not None,
         "device": str(DEVICE),
+        "model_version": model_version,
     }
 
 
@@ -143,7 +157,7 @@ async def predict(file: UploadFile = File(...)):
             "prediction": prediction,
             "confidence": confidence,
             "inference_time_ms": inference_time_ms,
-            "model_version": app.version,
+            "model_version": model_version,
         }),
     )
 

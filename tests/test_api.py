@@ -132,3 +132,21 @@ def test_metrics_track_predictions(test_image):
         )
 
         assert metrics["average_inference_time_ms"] >= 0
+
+def test_model_version_matches_checkpoint(test_checkpoint):
+    import hashlib
+
+    expected_hash = hashlib.sha256(
+        test_checkpoint.read_bytes()
+    ).hexdigest()
+
+    with TestClient(app) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["model_loaded"] is True
+    assert data["model_version"] == expected_hash
+    assert len(data["model_version"]) == 64
