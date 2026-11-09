@@ -32,6 +32,11 @@ jobs:
         run: |
           python -m pytest -v tests/
 
+      - name: Validate Cloud Run configuration
+        run: |
+          python -m pip install pyyaml
+          python scripts/validate_cloudrun.py
+
   docker:
     name: Docker Build and Health Check
     runs-on: ubuntu-latest
